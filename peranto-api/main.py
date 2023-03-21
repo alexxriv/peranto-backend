@@ -11,9 +11,16 @@ app = FastAPI()
 
 @app.middleware("http")
 async def authorize(request, call_next):
+
+    # Exclude docs and openapi from authorization
+    if request.url.path.startswith("/docs") or request.url.path.startswith("/openapi.json"):
+        response = await call_next(request)
+        return response
     # get the token from the request
     token = request.headers.get("Authorization")
     # check if the token is valid
+    if not token:
+        return JSONResponse(status_code=401, content={"message": "Unauthorized"})
     if 'Bearer' not in token:
         return JSONResponse(status_code=401, content={"message": "Unauthorized"})
     # if the token is valid, call the next middleware
