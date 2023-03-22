@@ -1,0 +1,2 @@
+#A client represents the person or company you will perform on the various checks. To initiate a check, you must first create a client.
+#The API allows you to create, retrieve, update, and delete your clients. You can retrieve specific clients as well as a list of all your clients.

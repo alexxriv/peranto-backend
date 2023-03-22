@@ -1,0 +1,3 @@
+#Empower Identity Checks with the most elaborate form of active liveness check.
+#A Live Video is a video of the client performing recital and movement challenges to ensure liveness. Typically, along with an ID document, they are used to perform .
+#The live videos API allows you to retrieve, download, and delete live photos. You can retrieve a specific live video as well as a list of all your client's live videos.
