@@ -1,22 +1,83 @@
-import cryptography
-import jwt
+from typing import Optional, MutableMapping, List, Union
 
-ISSUER = 'sample-auth-server'
+from datetime import datetime, timedelta
 
-with open('public.pem', 'rb') as f:
-  public_key = f.read()
+from fastapi.security import OAuth2PasswordBearer
+from sqlalchemy.orm.session import Session
 
-def verify_access_token(access_token):
-  print("access_token to verify: ", access_token)
-  try:
-    decoded_token = jwt.decode(access_token, public_key,
-                               issuer = ISSUER,
-                               algorithms = ['RS256'])
-  except (jwt.exceptions.InvalidTokenError,
-          jwt.exceptions.InvalidSignatureError,
-          jwt.exceptions.InvalidIssuerError ,
-          jwt.exceptions.ExpiredSignatureError) as e:
-    print(e)
-    return False
+from jose import jwt
 
-  return True
+from app.models.user import User
+
+from app.core.config import settings
+
+from app.core.security import verify_password
+
+
+JWTPayloadMapping = MutableMapping[ 
+
+    str, Union[datetime,bool, str, List[str], List[int]]
+]
+
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl=f"{settings.API_V1_STR}/auth/login")
+
+
+def authenticate (
+        *,
+        email: str,
+        password: str,
+        db: Session
+    ) -> Optional[User]:
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            return None
+        if not verify_password(password, user.hashed_password):
+            return None
+        return user
+
+
+def create_access_token_copilot(
+        *,
+        data: dict,
+        expires_delta: Optional[timedelta] = None
+    ) -> str:
+        to_encode = data.copy()
+        if expires_delta:
+            expire = datetime.utcnow() + expires_delta
+        else:
+            expire = datetime.utcnow() + timedelta(minutes=15)
+        to_encode.update({"exp": expire})
+        encoded_jwt = jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.ALGORITHM)
+        return encoded_jwt
+
+
+def create_access_token(*, sub: str) -> str:
+    return _create_token(
+        token_type="access_token",
+        lifetime=timedelta(minutes=settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        sub=sub,
+    )
+
+
+def _create_token(
+    token_type: str,
+    lifetime: timedelta,
+    sub: str,
+) -> str:
+    payload = {}
+    expire = datetime.utcnow() + lifetime
+    payload["type"] = token_type
+
+    # https://datatracker.ietf.org/doc/html/rfc7519#section-4.1.3
+    # The "exp" (expiration time) claim identifies the expiration time on
+    # or after which the JWT MUST NOT be accepted for processing
+    payload["exp"] = expire
+
+    # The "iat" (issued at) claim identifies the time at which the
+    # JWT was issued.
+    payload["iat"] = datetime.utcnow()
+
+    # The "sub" (subject) claim identifies the principal that is the
+    # subject of the JWT
+    payload["sub"] = str(sub)
+    return jwt.encode(payload, settings.JWT_SECRET, algorithm=settings.ALGORITHM)
