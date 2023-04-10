@@ -9,7 +9,7 @@ from sqlalchemy.orm.session import Session
 
 
 from app.core.config import settings
-from app.core.auth import oauth2_scheme
+from app.core.auth_oauth import oauth2_scheme
 
 from app.db.session import SessionLocal
 from app.models.user import User

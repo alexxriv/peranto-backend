@@ -9,7 +9,7 @@ class User(Base):
     first_name = Column(String(50), nullable=False)
     surname = Column(String(50), nullable=False)
     email = Column(String(50), nullable=False, unique=True)
-    is_superuser = Column(Boolean(), default=False)
+    is_superuser = Column(Boolean, default=False)
 
 
     photos = relationship(

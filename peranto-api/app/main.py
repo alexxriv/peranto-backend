@@ -2,7 +2,7 @@ import json
 
 from fastapi import FastAPI
 from fastapi.responses import JSONResponse
-from app.core.auth import verify_access_token
+from app.core.auth_oauth import verify_access_token
 from app.api.api_v1.api import api_router
 
 app = FastAPI()

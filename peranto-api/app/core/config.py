@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     
     SQLALCHEMY_DATABASE_URI: Optional[str] = "sqlite:///./sql_app.db"
     FIRST_SUPERUSER: EmailStr = "admin@email.com"
+    
     FIRST_SUPERUSER_PASSWORD: str = "CHANGEME"
 
     class Config:

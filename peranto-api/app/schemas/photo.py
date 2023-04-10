@@ -1,40 +1,38 @@
 from typing import Optional
 
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, HttpUrl
 
 
 class PhotoBase(BaseModel):
-    photo_id: Optional[str]
-    client_id: Optional[str]
-    dowload_link: Optional[EmailStr] = None
-    size: bool = False
-    created_at: bool = False
-    updated_at: bool = False
+    title: str
+    description: Optional[str]
+    url: HttpUrl
 
 
 
 # Properties to receive via API on creation
-class PhootCreate(PhotoBase):
-    photo_id: EmailStr
+class PhotoCreate(PhotoBase):
+    owner_id: int
 
 
 # Properties to receive via API on update
 class PhotoUpdate(PhotoBase):
-    ...
+    url: Optional[HttpUrl]
 
 
 class PhotoInDBBase(PhotoBase):
-    id: Optional[int] = None
+    photo_id: int
+    owner_id: int
 
-    class Config:
+    class Config: # This orm_mode is required to allow Pydantic to read the data even if it is not a dict, but an ORM model. Without it if you return a SQLAlchemy model from your path operation it wouldnt include the relationship data.
         orm_mode = True
 
 
 # Additional properties stored in DB but not returned by API
 class PhotoInDB(PhotoInDBBase):
-    content_type: str
+    pass
 
 
 # Additional properties to return via API
 class Photo(PhotoInDBBase):
-    ...
+    pass

@@ -1,12 +1,12 @@
 
 from sqlalchemy import Column, Integer, String, ForeignKey
 from sqlalchemy.orm import relationship
-
+from app.db.base_class import Base
 
 class Photo(Base):
-    id = Column(Integer, primary_key=True, index=True)
-    title = Column(String, index=True)
-    description = Column(String, index=True)
-    url = Column(String, index=True)
-    owner_id = Column(Integer, ForeignKey("user.id"))
+    photo_id = Column(Integer, primary_key=True, index=True)
+    title = Column(String(256), index=True, nullable=False)
+    description = Column(String(256), index=True, nullable=True)
+    url = Column(String(256), nullable=False)
+    owner_id = Column(String(10), ForeignKey("user.id"), nullable=False)
     owner = relationship("User", back_populates="photos")
