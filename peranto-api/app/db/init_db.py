@@ -38,7 +38,6 @@ def init_db(db: Session) -> None:
     # But if you dont want to use migrations, create
     # The tables uncommenting the following lines
     # Base.metadata.create_all(bind=engine)
-
     if settings.FIRST_SUPERUSER:
         user = crud.user.get_by_email(db, email= settings.FIRST_SUPERUSER)
         if not user:

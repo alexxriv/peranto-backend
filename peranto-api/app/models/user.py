@@ -15,7 +15,7 @@ class User(Base):
     photos = relationship(
         "Photo",
         cascade="all,delete-orphan",
-        back_populates="submitter",
+        back_populates="owner",
         uselist=True)
     
     hashed_password = Column(String(100), nullable=False)

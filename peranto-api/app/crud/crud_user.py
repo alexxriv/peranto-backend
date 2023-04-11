@@ -6,9 +6,11 @@ from app.crud.base import CRUDBase
 from app.models.user import User
 from app.schemas.user import UserCreate, UserUpdate
 from app.core.security import get_password_hash
+
+
 class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     def get_by_email(self, db: Session, *, email:str) -> Optional[User]:
-        return db.query(User.filter(User.email == email)).first()
+        return db.query(User).filter(User.email == email).first()
     
 
     def create(self, db: Session, *, obj_in: UserCreate) -> User:
@@ -17,7 +19,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         create_data.pop("password")
         db_obj = User(**create_data) # We use ** to unpack the dictionary
 
-        dp_obj.hash_password = get_password_hash(obj_in.password)
+        db_obj.hash_password = get_password_hash(obj_in.password)
 
         db.add(db_obj)
         db.commit()
