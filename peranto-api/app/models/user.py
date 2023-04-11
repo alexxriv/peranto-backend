@@ -6,17 +6,13 @@ from app.db.base_class import Base
 
 class User(Base):
     id = Column(Integer, primary_key=True, index=True)
-    first_name = Column(String(50), nullable=False)
-    surname = Column(String(50), nullable=False)
-    email = Column(String(50), nullable=False, unique=True)
+    first_name = Column(String(256), nullable=True)
+    surname = Column(String(256), nullable=True)
+    email = Column(String, index=True, nullable=False)
     is_superuser = Column(Boolean, default=False)
-
-
     photos = relationship(
         "Photo",
         cascade="all,delete-orphan",
         back_populates="owner",
-        uselist=True)
-    
-    hashed_password = Column(String(100), nullable=False)
-
+        uselist=True,
+    )

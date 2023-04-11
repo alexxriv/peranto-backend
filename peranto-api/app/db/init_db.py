@@ -8,26 +8,26 @@ from app.core.config import settings
 logger = logging.getLogger(__name__)
 
 PHOTOS = [
-
     {
-        "title": "A photo",
-        "description": "A photo description",
-        "url": "https://picsum.photos/200/300",
-        "owner_id": 1
+        "id": 1,
+        "label": "Juan Perez",
+        "source": "Peranto ID",
+        "url": "http://photo1.png",
     },
     {
-        "title": "Another photo",
-        "description": "Another photo description",
-        "url": "https://picsum.photos/200/300",
-        "owner_id": 1
+        "id": 2,
+        "label": "Alma Perez",
+        "source": "Peranto Photo",
+        "url": "http://photo2.png",
     },
     {
-        "title": "Yet another photo",
-        "description": "Yet another photo description",
-        "url": "https://picsum.photos/200/300",
-        "owner_id": 1
+        "id": 3,
+        "label": "Rogelio Perez",
+        "source": "Peranto Photo",
+        "url": "http://photo3.png",
     },
 ]
+
 
 # Make sure all SQL Alchemy models are imported (app.db.base) before initializing,
 # otherwise Alembic might fail to initialize realtionships property
@@ -58,12 +58,12 @@ def init_db(db: Session) -> None:
         if not user.photos:
             for photo in PHOTOS:
                 photo_in = schemas.PhotoCreate(
-                    title=photo["title"],
-                    description=photo["description"],
+                    label=photo["label"],
+                    source=photo["source"],
                     url=photo["url"],
-                    owner_id=photo["owner_id"]
+                    owner_id=user.id,
                 )
-                crud.photo.create(db=db, obj_in=photo_in, owner_id=user.id)
+                crud.photo.create(db=db, obj_in=photo_in)
 
     else:
         logger.warning(

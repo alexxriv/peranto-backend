@@ -30,7 +30,7 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
     
-    SQLALCHEMY_DATABASE_URI: Optional[str] = "sqlite:///./sql_app.db"
+    SQLALCHEMY_DATABASE_URI: Optional[str] = "sqlite:///example.db"
     FIRST_SUPERUSER: EmailStr = "admin@email.com"
     
     FIRST_SUPERUSER_PASSWORD: str = "CHANGEME"
