@@ -5,7 +5,7 @@ python ./app/backend_pre_start.py
 
 # Run migrations
 
-#alembic revision --autogenerate -m "first migration"
+alembic revision --autogenerate -m "first migration"
 
 alembic upgrade head
 

@@ -16,3 +16,5 @@ class User(Base):
         back_populates="owner",
         uselist=True,
     )
+
+    hashed_password = Column(String(), nullable=False)

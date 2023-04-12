@@ -1,21 +1,16 @@
 from typing import Optional, MutableMapping, List, Union
-
 from datetime import datetime, timedelta
 
+from jose import jwt
 from fastapi.security import OAuth2PasswordBearer
 from sqlalchemy.orm.session import Session
 
-from jose import jwt
-
 from app.models.user import User
-
 from app.core.config import settings
-
 from app.core.security import verify_password
 
 
 JWTPayloadMapping = MutableMapping[ 
-
     str, Union[datetime,bool, str, List[str], List[int]]
 ]
 

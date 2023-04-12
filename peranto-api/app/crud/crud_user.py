@@ -19,7 +19,7 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
         create_data.pop("password")
         db_obj = User(**create_data) # We use ** to unpack the dictionary
 
-        db_obj.hash_password = get_password_hash(obj_in.password)
+        db_obj.hashed_password = get_password_hash(obj_in.password)
 
         db.add(db_obj)
         db.commit()

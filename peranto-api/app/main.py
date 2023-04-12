@@ -1,44 +1,47 @@
-import json
+import time
+from pathlib import Path
 
-from fastapi import FastAPI
-from fastapi.responses import JSONResponse
-from app.core.auth_oauth import verify_access_token
+from fastapi import FastAPI, APIRouter, Request, Depends
+from sqlalchemy.orm import Session
+
+from app import crud
+from app.api import deps
 from app.api.api_v1.api import api_router
+from app.core.config import settings
 
-app = FastAPI()
+BASE_PATH = Path(__file__).resolve().parent
 
-# middleware to authorize all requests
+root_router = APIRouter()
+app = FastAPI(title="Recipe API", openapi_url=f"{settings.API_V1_STR}/openapi.json")
+
+
+@root_router.get("/", status_code=200)
+def root(
+    request: Request,
+    db: Session = Depends(deps.get_db),
+) -> dict:
+    """
+    Root GET
+    """
+    photos = crud.photo.get_multi(db)
+    return {"photos": photos}
+
 
 @app.middleware("http")
-async def authorize(request, call_next):
-    print("request.url.path: ", request.url.path)
+async def add_process_time_header(request: Request, call_next):
+    start_time = time.time()
+    response = await call_next(request)
+    process_time = time.time() - start_time
+    response.headers["X-Process-Time"] = str(process_time)
+    return response
 
-    # Exclude docs and openapi from authorization
-    if request.url.path.startswith("/docs") or request.url.path.startswith("/openapi.json"):
-        response = await call_next(request)
-        return response
-    print("request.headers: ", request.headers)
-    # get the token from the request
-    token = request.headers.get("authorization")
 
-    print("token: ", token)
-    # check if the token is valid
-    if not token:
-        return JSONResponse(status_code=401, content={"message": "Unauthorized"})
-    if 'Bearer' not in token:
-        return JSONResponse(status_code=401, content={"message": "Unauthorized"})
-    # if the token is valid, call the next middleware
-    
-    access_token = token[7:]
-    print("access_token: ", access_token)
-    if access_token and verify_access_token(access_token):
-        response = await call_next(request)
-        
-        return response
-    else:
-        return JSONResponse(status_code=401, content={"message": "Unauthorized"})
+app.include_router(api_router, prefix=settings.API_V1_STR)
+app.include_router(root_router)
 
-app.include_router(api_router)
 
-# Post request to create a new user. User has a name and an email
+if __name__ == "__main__":
+    # Use this for debugging purposes only
+    import uvicorn
 
+    uvicorn.run(app, host="0.0.0.0", port=8001, log_level="debug")
