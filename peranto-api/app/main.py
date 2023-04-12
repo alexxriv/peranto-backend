@@ -2,18 +2,34 @@ import time
 from pathlib import Path
 
 from fastapi import FastAPI, APIRouter, Request, Depends
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
+
+
 
 from app import crud
 from app.api import deps
 from app.api.api_v1.api import api_router
 from app.core.config import settings
 
+
 BASE_PATH = Path(__file__).resolve().parent
 
 root_router = APIRouter()
 app = FastAPI(title="Recipe API", openapi_url=f"{settings.API_V1_STR}/openapi.json")
 
+origins = [
+    "http://localhost:8001",
+    "http://localhost:3000",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 @root_router.get("/", status_code=200)
 def root(
