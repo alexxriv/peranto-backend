@@ -21,6 +21,7 @@ app = FastAPI(title="Recipe API", openapi_url=f"{settings.API_V1_STR}/openapi.js
 origins = [
     "http://localhost:8001",
     "http://localhost:3000",
+
 ]
 
 app.add_middleware(
