@@ -33,10 +33,13 @@ def login(
     #access_token = create_access_token(data={"sub": user.email})
     #return {"access_token": access_token, "token_type": "bearer"}
 
-    return {
+    response = {
         "access_token": create_access_token(sub=user.email),
         "token_type": "bearer",
     }
+
+    logger.info(response)
+    return response
 
 
 @router.post("/signup", response_model=schemas.User, status_code=201)
