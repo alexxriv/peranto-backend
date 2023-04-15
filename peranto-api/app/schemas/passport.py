@@ -3,13 +3,16 @@ from typing import Optional, Sequence
 from pydantic import BaseModel
 
 class PassportBase(BaseModel):
-    document_id: Optional[str]
-    client_id: Optional[str]
-    document_type: Optional[str] = None
-    classification: Optional[str] #The classification or purpose of this document. Valid values include: proof_of_identity, source_of_wealth ,source_of_funds, proof_of_address, company_filing, other
-    #images: Optional[str] #The images associated with this document. This is a list of image IDs.
-    created_at: bool = False
-    updated_at: bool = False
+    passport_type = str
+    country_code = str
+    passport_number = str
+    last_names = str
+    names = str
+    country = str
+    curp = str
+    birth_date = str
+    issue_date = str
+    expiration_date = str
 
 class PassportCreate(PassportBase):
     document_id: str
