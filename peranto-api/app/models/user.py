@@ -14,13 +14,13 @@ class User(Base):
         "Photo",
         cascade="all,delete-orphan",
         back_populates="owner",
-        uselist=True,
+        uselist=False,
     )
     passports = relationship(
         "Passport",
         cascade="all,delete-orphan",
         back_populates="owner",
-        uselist=True,
+        uselist=False,
     )
 
     hashed_password = Column(String(), nullable=False)

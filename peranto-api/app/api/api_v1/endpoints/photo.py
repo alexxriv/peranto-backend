@@ -25,13 +25,16 @@ def fetch_photo(
     *,
     db: Session = Depends(deps.get_db),
     photo_id: int,
+    current_user: User = Depends(deps.get_current_user),
 ) -> Any:
     """
-    Retrieve a photo.
+    Retrieve a photo owned by the current user.
     """
     photo = crud.photo.get(db=db, id=photo_id)
     if not photo:
         raise HTTPException(status_code=404, detail=f"photo with id {photo_id} not found")
+    if photo.owner_id != current_user.id:
+        raise HTTPException(status_code=403, detail="Forbidden")
     return photo
 
 

@@ -16,5 +16,5 @@ class Passport(Base):
     birth_date = Column(String(256), nullable=True)
     issue_date = Column(String(256), nullable=True)
     expiration_date = Column(String(256), nullable=True)
-    owner_id = Column(Integer, ForeignKey("user.id"), nullable=True)
+    owner_id = Column(Integer, ForeignKey("user.id"), nullable=True, unique=True)
     owner = relationship("User", back_populates="passports")
