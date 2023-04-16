@@ -15,16 +15,16 @@ class PassportBase(BaseModel):
     expiration_date = str
 
 class PassportCreate(PassportBase):
-    document_id: str
-    client_id: str
-    document_type: str
-    classification: str
+    owner_id = int
+    ...
 
 class PassportUpdate(PassportBase):
     ...
 
 class PassportInDBBase(PassportBase):
     id: Optional[int] = None
+    owner_id = int
+
 
     class Config:
         orm_mode = True

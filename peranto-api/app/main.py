@@ -1,3 +1,7 @@
+import os
+import logging
+from dotenv import load_dotenv
+
 import time
 from pathlib import Path
 
@@ -5,13 +9,18 @@ from fastapi import FastAPI, APIRouter, Request, Depends
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
 
-
-
 from app import crud
 from app.api import deps
 from app.api.api_v1.api import api_router
 from app.core.config import settings
 
+
+load_dotenv()
+
+LOG_CONFIG_FILE = "logging.conf"
+# setup loggers
+logging.config.fileConfig(LOG_CONFIG_FILE, disable_existing_loggers=False)
+logger = logging.getLogger(__name__)
 
 BASE_PATH = Path(__file__).resolve().parent
 
@@ -40,6 +49,7 @@ def root(
     """
     Root GET
     """
+    logger.debug("Root GET")
     photos = crud.photo.get_multi(db)
     return {"photos": photos}
 

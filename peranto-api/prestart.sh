@@ -1,4 +1,6 @@
 #! /usr/bin/env bash
+rm -rf /alembic/versions/*
+
 
 # Let the DB start
 python ./app/backend_pre_start.py

@@ -16,5 +16,11 @@ class User(Base):
         back_populates="owner",
         uselist=True,
     )
+    passports = relationship(
+        "Passport",
+        cascade="all,delete-orphan",
+        back_populates="owner",
+        uselist=True,
+    )
 
     hashed_password = Column(String(), nullable=False)

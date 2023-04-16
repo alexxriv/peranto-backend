@@ -28,11 +28,11 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
     
     def update(
             self, db: Session, *, db_obj:User, obj_in: Union[UserUpdate, Dict[str, Any]]
-    ) -> User:
-        if isinstance(obj_in, dict):
+    ) -> User: # we overwrite the update method to avoid the error when we try to update the password
+        if isinstance(obj_in, dict): # If obj_in is a dictionary, we do this to avoid the error
             update_data = obj_in
         else:
-            update_data = obj_in.dict(exclude_unset=True)
+            update_data = obj_in.dict(exclude_unset=True) # If obj_in is a UserUpdate object, we do this to avoid the error
 
         return super().update(db, db_obj=db_obj, obj_in=update_data)
     

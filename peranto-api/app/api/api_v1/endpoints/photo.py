@@ -16,6 +16,7 @@ from sqlalchemy.orm import Session
 from app import crud
 from app.api import deps
 from app.schemas.photo import Photo, PhotoCreate, PhotoUpdate, PhotoSearchResults
+from app.models.user import User
 
 router = APIRouter()
 
@@ -24,7 +25,6 @@ def fetch_photo(
     *,
     db: Session = Depends(deps.get_db),
     photo_id: int,
-    current_user: Any = Depends(deps.get_current_user),
 ) -> Any:
     """
     Retrieve a photo.
@@ -33,6 +33,24 @@ def fetch_photo(
     if not photo:
         raise HTTPException(status_code=404, detail=f"photo with id {photo_id} not found")
     return photo
+
+
+@router.get("/my-photos/", status_code=200, response_model=PhotoSearchResults)
+def fetch_my_photos(
+    *,
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
+) -> dict:
+    """
+    Retrieve all photos for the current user.
+    """
+    photos = current_user.photos
+    print(photos)
+    if not photos:
+        return {"results": []}
+    
+    return {"results": list(photos)}
+
 
 @router.get("/search/", status_code=200, response_model=PhotoSearchResults)
 def search_photos(
@@ -52,11 +70,18 @@ def search_photos(
 
 @router.post("/", status_code=201, response_model=Photo)
 def create_photo(
-    *, photo_in: PhotoCreate, db: Session = Depends(deps.get_db)
+    *, 
+    photo_in: PhotoCreate, 
+    db: Session = Depends(deps.get_db),
+    current_user: User = Depends(deps.get_current_user),
 ) -> dict:
     """
     Create a new photo in the database.
     """
+
+    if photo_in.owner_id != current_user.id:
+        raise HTTPException(status_code=400, detail="You can only create photos for yourself")
+    
     photo = crud.photo.create(db=db, obj_in=photo_in)
 
     return photo
