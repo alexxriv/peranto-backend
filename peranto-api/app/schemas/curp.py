@@ -4,17 +4,18 @@ from pydantic import BaseModel
 
 class CurpBase(BaseModel):
     curp:str
-    client_id: Optional[str]
     
 
 class CurpCreate(CurpBase):
     curp: str
+    owner_id: int
 
 class CurpUpdate(CurpBase):
-    ...
+    curp:str
 
 class CurpInDBBase(CurpBase):
     id: Optional[int] = None
+    owner_id: int
 
     class Config:
         orm_mode = True
@@ -26,5 +27,4 @@ class Curp(CurpInDBBase):
     pass
 
 class CurpSearchResults(BaseModel):
-    total: int
     results: Sequence[Curp]

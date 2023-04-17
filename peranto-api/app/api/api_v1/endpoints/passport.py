@@ -35,7 +35,7 @@ def fetch_passport(
 
 
 @router.get("/", status_code=200, response_model=Any)
-def fetch_my_passports(
+def fetch_my_passport(
     *,
     db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
@@ -43,11 +43,11 @@ def fetch_my_passports(
     """
     Retrieve passport for the current user.
     """
-    passports = current_user.passports
-    if not passports:
-        raise HTTPException(status_code=404, detail="No passports found")
+    passport = current_user.passport
+    if not passport:
+        raise HTTPException(status_code=404, detail="No passport found")
     
-    return passports
+    return passport
 
 
 @router.post("/", status_code=201, response_model=Any) # TODO response_model=Passport
@@ -94,13 +94,13 @@ def delete_passport(
 ) -> Any:
     """
     Delete a passport owned by the current user.
-    We get all passports owned by current user and delte them
+    We get all  owned by current user and delte them
     """
 
     passport = current_user.passport
     if not passport:
-        raise HTTPException(status_code=404, detail="No passports found")
+        raise HTTPException(status_code=404, detail="No passport found")
     passport = crud.passport.remove(db=db, id=passport.id)
-    return {"message": "Passports deleted"}
+    return {"message": "Passport deleted"}
 
     

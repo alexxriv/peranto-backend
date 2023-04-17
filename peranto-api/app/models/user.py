@@ -10,7 +10,7 @@ class User(Base):
     surname = Column(String(256), nullable=True)
     email = Column(String, index=True, nullable=False)
     is_superuser = Column(Boolean, default=False)
-    photo = relationship(
+    photos = relationship(
         "Photo",
         cascade="all,delete-orphan",
         back_populates="owner",
@@ -18,6 +18,12 @@ class User(Base):
     )
     passport = relationship(
         "Passport",
+        cascade="all,delete-orphan",
+        back_populates="owner",
+        uselist=False,
+    )
+    curp = relationship(
+        "Curp",
         cascade="all,delete-orphan",
         back_populates="owner",
         uselist=False,
