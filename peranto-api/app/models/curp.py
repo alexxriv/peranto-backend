@@ -6,5 +6,6 @@ from app.db.base_class import Base
 
 class Curp(Base):
     id = Column(Integer, primary_key=True, index=True)
+    curp = Column(String(256), nullable=False)
     owner_id = Column(Integer, ForeignKey("user.id"), nullable=True, unique=True)
     owner = relationship("User", back_populates="curp")

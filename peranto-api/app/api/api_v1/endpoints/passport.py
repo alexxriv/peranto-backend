@@ -1,4 +1,5 @@
 import logging
+from sqlite3 import IntegrityError
 
 from typing import Any, Optional
 
@@ -7,37 +8,16 @@ from sqlalchemy.orm import Session
 
 from app import crud
 from app.api import deps
-from app.schemas.passport import Passport, PassportCreate, PassportUpdate, PassportSearchResults
+from app.schemas.passport import PassportCreate, PassportUpdate, Passport
 from app.models.user import User
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-
-@router.get("/{passport_id}", status_code=200, response_model=Passport)
-def fetch_passport(
-    *,
-    db: Session = Depends(deps.get_db),
-    passport_id: int,
-    current_user: User = Depends(deps.get_current_user),
-) -> Any:
-    """
-    Retrieve a passport owned by the current user.
-    """
-
-    passport = crud.passport.get(db=db, id=passport_id)
-    if not passport:
-        raise HTTPException(status_code=404, detail=f"passport with id {passport_id} not found")
-    if passport.owner_id != current_user.id:
-        raise HTTPException(status_code=403, detail="Forbidden")
-    return passport
-
-
-@router.get("/", status_code=200, response_model=Any)
+@router.get("/", status_code=200, response_model=Passport)
 def fetch_my_passport(
     *,
-    db: Session = Depends(deps.get_db),
     current_user: User = Depends(deps.get_current_user),
 ) -> dict:
     """
@@ -46,24 +26,25 @@ def fetch_my_passport(
     passport = current_user.passport
     if not passport:
         raise HTTPException(status_code=404, detail="No passport found")
-    
     return passport
 
 
-@router.post("/", status_code=201, response_model=Any) # TODO response_model=Passport
+@router.post("/", status_code=201, response_model=Passport) 
 def create_passport(
     *,
     db: Session = Depends(deps.get_db),
     passport_in: PassportCreate,
     current_user: User = Depends(deps.get_current_user),
-) -> Any:
+) -> dict:
     """
     Create a new passport for the current user, owner id must be the current user.
     """
     if passport_in.owner_id != current_user.id:
         raise HTTPException(status_code=403, detail="Forbidden")
+    passport = current_user.passport
+    if passport:
+        raise HTTPException(status_code=400, detail="Passport already exists")
     passport = crud.passport.create(db=db, obj_in=passport_in)
-    logger.debug(f"passport created with id {passport.id}")
     return passport
 
 

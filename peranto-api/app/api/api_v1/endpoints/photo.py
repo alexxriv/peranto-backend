@@ -7,7 +7,8 @@
 #Liveness Check: checks if a photo is genuine and is not a spoofed photo of an image or photo-of-a-photo.
 #The live photos API allows you to upload, retrieve, download, and delete live photos. You can retrieve a specific live photo as well as a list of all your client's live photos.
 
-import asyncio
+
+import logging
 from typing import Any, Optional
 
 from fastapi import APIRouter, Query, HTTPException, Depends, UploadFile, File
@@ -15,10 +16,11 @@ from sqlalchemy.orm import Session
 
 from app import crud
 from app.api import deps
-from app.schemas.photo import Photo, PhotoCreate, PhotoUpdate, PhotoSearchResults
+from app.schemas.photo import Photo, PhotoCreate
 from app.models.user import User
 
 router = APIRouter()
+logger = logging.getLogger(__name__)
 
 @router.get("/{photo_id}", status_code=200, response_model=Photo)
 def fetch_photo(
@@ -49,7 +51,7 @@ def fetch_my_photos(
     """
     photo = current_user.photo
     if not photo:
-        return {"photo": None}
+        raise HTTPException(status_code=404, detail="You don't have any photos")
     
     return photo
 
@@ -83,7 +85,13 @@ def create_photo(
 
     if photo_in.owner_id != current_user.id:
         raise HTTPException(status_code=400, detail="You can only create photo for yourself")
-    
+    if current_user.photo:
+        raise HTTPException(status_code=400, detail="You already have a photo")
     photo = crud.photo.create(db=db, obj_in=photo_in)
+    logger.debug(f"photo created: {photo}")
+    logger.debug(f"photo owner: {photo.owner}")
+    logger.debug(f"photo type: {type(photo)}")
+    logger.debug(f"photo repr type: {photo.__repr__()}")
+
 
     return photo
