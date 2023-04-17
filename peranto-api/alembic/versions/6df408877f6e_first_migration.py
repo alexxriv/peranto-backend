@@ -1,8 +1,8 @@
 """first migration
 
-Revision ID: f7f0af0ce005
+Revision ID: 6df408877f6e
 Revises: 
-Create Date: 2023-04-16 14:44:16.875864
+Create Date: 2023-04-17 00:01:53.551777
 
 """
 from alembic import op
@@ -10,7 +10,7 @@ import sqlalchemy as sa
 
 
 # revision identifiers, used by Alembic.
-revision = 'f7f0af0ce005'
+revision = '6df408877f6e'
 down_revision = None
 branch_labels = None
 depends_on = None
@@ -29,6 +29,14 @@ def upgrade() -> None:
     )
     op.create_index(op.f('ix_user_email'), 'user', ['email'], unique=False)
     op.create_index(op.f('ix_user_id'), 'user', ['id'], unique=False)
+    op.create_table('curp',
+    sa.Column('id', sa.Integer(), nullable=False),
+    sa.Column('owner_id', sa.Integer(), nullable=True),
+    sa.ForeignKeyConstraint(['owner_id'], ['user.id'], ),
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('owner_id')
+    )
+    op.create_index(op.f('ix_curp_id'), 'curp', ['id'], unique=False)
     op.create_table('passport',
     sa.Column('id', sa.Integer(), nullable=False),
     sa.Column('passport_type', sa.String(length=256), nullable=False),
@@ -43,7 +51,8 @@ def upgrade() -> None:
     sa.Column('expiration_date', sa.String(length=256), nullable=True),
     sa.Column('owner_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['owner_id'], ['user.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('owner_id')
     )
     op.create_index(op.f('ix_passport_country_code'), 'passport', ['country_code'], unique=False)
     op.create_index(op.f('ix_passport_id'), 'passport', ['id'], unique=False)
@@ -54,7 +63,8 @@ def upgrade() -> None:
     sa.Column('source', sa.String(length=256), nullable=True),
     sa.Column('owner_id', sa.Integer(), nullable=True),
     sa.ForeignKeyConstraint(['owner_id'], ['user.id'], ),
-    sa.PrimaryKeyConstraint('id')
+    sa.PrimaryKeyConstraint('id'),
+    sa.UniqueConstraint('owner_id')
     )
     op.create_index(op.f('ix_photo_id'), 'photo', ['id'], unique=False)
     op.create_index(op.f('ix_photo_url'), 'photo', ['url'], unique=False)
@@ -69,6 +79,8 @@ def downgrade() -> None:
     op.drop_index(op.f('ix_passport_id'), table_name='passport')
     op.drop_index(op.f('ix_passport_country_code'), table_name='passport')
     op.drop_table('passport')
+    op.drop_index(op.f('ix_curp_id'), table_name='curp')
+    op.drop_table('curp')
     op.drop_index(op.f('ix_user_id'), table_name='user')
     op.drop_index(op.f('ix_user_email'), table_name='user')
     op.drop_table('user')

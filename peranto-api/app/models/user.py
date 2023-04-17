@@ -10,7 +10,7 @@ class User(Base):
     surname = Column(String(256), nullable=True)
     email = Column(String, index=True, nullable=False)
     is_superuser = Column(Boolean, default=False)
-    photos = relationship(
+    photo = relationship(
         "Photo",
         cascade="all,delete-orphan",
         back_populates="owner",

@@ -1,7 +1,7 @@
 #! /usr/bin/env bash
 rm example.db
-rm /alembic/versions/*
-rm -rf /alembic/versions/__pycache__
+rm -r ./alembic/versions/*
+rm -rf ./alembic/versions/__pycache__
 
 
 # Let the DB start

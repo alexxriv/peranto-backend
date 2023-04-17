@@ -14,18 +14,6 @@ PHOTOS = [
         "source": "Peranto ID",
         "url": "http://photo1.png",
     },
-    {
-        "id": 2,
-        "label": "Alma Perez",
-        "source": "Peranto Photo",
-        "url": "http://photo2.png",
-    },
-    {
-        "id": 3,
-        "label": "Rogelio Perez",
-        "source": "Peranto Photo",
-        "url": "http://photo3.png",
-    },
 ]
 
 
@@ -55,7 +43,7 @@ def init_db(db: Session) -> None:
                 f"Email: {settings.FIRST_SUPERUSER} already exists in the database."
             )
 
-        if not user.photos:
+        if not user.photo:
             for photo in PHOTOS:
                 photo_in = schemas.PhotoCreate(
                     label=photo["label"],

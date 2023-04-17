@@ -38,7 +38,7 @@ def fetch_photo(
     return photo
 
 
-@router.get("/my-photos/", status_code=200, response_model=PhotoSearchResults)
+@router.get("/my-photos/", status_code=200, response_model=Photo)
 def fetch_my_photos(
     *,
     db: Session = Depends(deps.get_db),
@@ -47,28 +47,27 @@ def fetch_my_photos(
     """
     Retrieve all photos for the current user.
     """
-    photos = current_user.photos
-    print(photos)
-    if not photos:
-        return {"results": []}
+    photo = current_user.photo
+    if not photo:
+        return {"photo": None}
     
-    return {"results": list(photos)}
+    return photo
 
 
-@router.get("/search/", status_code=200, response_model=PhotoSearchResults)
-def search_photos(
-    *,
-    keyword: str = Query(None, min_length=3, example="chicken"),
-    max_results: Optional[int] = 10,
-    db: Session = Depends(deps.get_db),
-) -> dict:
-    """
-    Search for photos based on label keyword
-    """
-    photos = crud.photo.get_multi(db=db, limit=max_results)
-    results = filter(lambda photo: keyword.lower() in photo.label.lower(), photos)
-
-    return {"results": list(results)}
+#@router.get("/search/", status_code=200, response_model=PhotoSearchResults)
+#def search_photos(
+#    *,
+#    keyword: str = Query(None, min_length=3, example="chicken"),
+#    max_results: Optional[int] = 10,
+#    db: Session = Depends(deps.get_db),
+#) -> dict:
+#    """
+#    Search for photos based on label keyword
+#    """
+#    photos = crud.photo.get_multi(db=db, limit=max_results)
+#    results = filter(lambda photo: keyword.lower() in photo.label.lower(), photos)
+#
+#    return {"results": list(results)}
 
 
 @router.post("/", status_code=201, response_model=Photo)
@@ -83,7 +82,7 @@ def create_photo(
     """
 
     if photo_in.owner_id != current_user.id:
-        raise HTTPException(status_code=400, detail="You can only create photos for yourself")
+        raise HTTPException(status_code=400, detail="You can only create photo for yourself")
     
     photo = crud.photo.create(db=db, obj_in=photo_in)
 

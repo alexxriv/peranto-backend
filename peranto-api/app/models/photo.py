@@ -10,4 +10,4 @@ class Photo(Base):
     url = Column(String(256), index=True, nullable=True)
     source = Column(String(256), nullable=True)
     owner_id = Column(Integer, ForeignKey("user.id"), nullable=True, unique=True)
-    owner = relationship("User", back_populates="photos")
+    owner = relationship("User", back_populates="photo")
