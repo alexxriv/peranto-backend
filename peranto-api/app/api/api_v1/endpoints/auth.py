@@ -1,9 +1,12 @@
+import json
 from typing import Any
 import logging 
-
+import asyncio
+import httpx
 from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm.session import Session
+
 
 from app import crud
 from app import schemas
@@ -13,6 +16,8 @@ from app.core.auth import (
     create_access_token
 )
 from app.models.user import User
+from app.clients.kilt import KiltClient
+
 
 logger = logging.getLogger(__name__)
 router = APIRouter()
@@ -40,6 +45,70 @@ def login(
 
     logger.info(response)
     return response
+
+
+@router.post("/kilt-login")
+async def login(
+    *,
+    kilt_client: KiltClient = Depends(deps.get_kilt_client),
+    presentation: schemas.PresentationCreate,
+) -> Any:
+    """
+    Get the JWT for a user with data from OAuth2 request form body
+    """
+    logger.debug(presentation)
+    return ""
+    logger.debug(json.loads(presentation))
+    return ""
+    logger.info("User logging in")
+    async with httpx.AsyncClient(timeout=90) as client:
+        response = await client.post(
+            kilt_client.base_url + "present",
+            json={"presentation": presentation},
+        )
+        response.raise_for_status()
+        logger.info(response)
+    logger.debug(response.json())
+    response = {
+        "access_token": create_access_token(sub=json.loads(presentation).claim.contents.email),
+        "token_type": "bearer",
+    }
+
+    logger.info(response)
+    return response
+
+
+@router.post("/kilt-signup")
+async def login(
+    *,
+    db: Session = Depends(deps.get_db),
+    kilt_client: KiltClient = Depends(deps.get_kilt_client),
+    user_in: schemas.UserCreate,
+    light_did_uri: str,
+
+) -> Any:
+    """
+    Create a user with data from KILT
+    """
+    logger.info("User signing up")
+    user = crud.user.get_by_email(db, email=user_in.email)
+    if user:
+        logger.info("user already exists")
+        raise HTTPException(status_code=400, detail="Email already registered")
+    
+    #Post request with json body {"email": email, "lightDidUri": light_did_uri}
+    async with httpx.AsyncClient(timeout=90) as client:
+        response = await client.post(
+            kilt_client.base_url + "register",
+            json={"email": user_in.email, "lightDidUri": light_did_uri},
+        )
+        response.raise_for_status()
+        logger.info(response)
+    logger.debug(response.json())
+    crud.user.create(db, obj_in=user_in)
+    return response.json()
+    
+
 
 
 @router.post("/signup", response_model=schemas.User, status_code=201)

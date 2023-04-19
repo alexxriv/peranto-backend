@@ -26,6 +26,17 @@ class CRUDUser(CRUDBase[User, UserCreate, UserUpdate]):
 
         return db_obj
     
+    def create_with_kilt(self, db: Session, *, obj_in: UserCreate) -> User:
+
+        create_data = obj_in.dict()
+        create_data.pop("password")
+        create_data["is_from_kilt"] = True
+        db_obj = User(**create_data) # We use ** to unpack the dictionary
+        db.add(db_obj)
+        db.commit()
+
+        return db_obj
+    
     def update(
             self, db: Session, *, db_obj:User, obj_in: Union[UserUpdate, Dict[str, Any]]
     ) -> User: # we overwrite the update method to avoid the error when we try to update the password

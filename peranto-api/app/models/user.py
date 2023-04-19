@@ -10,6 +10,7 @@ class User(Base):
     surname = Column(String(256), nullable=True)
     email = Column(String, index=True, nullable=False)
     is_superuser = Column(Boolean, default=False)
+    is_from_kilt = Column(Boolean, default=False)
     photo = relationship(
         "Photo",
         cascade="all,delete-orphan",
@@ -29,4 +30,4 @@ class User(Base):
         uselist=False,
     )
 
-    hashed_password = Column(String(), nullable=False)
+    hashed_password = Column(String(), nullable=True)
