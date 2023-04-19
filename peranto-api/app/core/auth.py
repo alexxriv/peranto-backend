@@ -31,6 +31,22 @@ def authenticate (
         return user
 
 
+def authenticate_kilt (
+        *,
+        email: str,
+        db: Session
+    ) -> Optional[User]:
+        # Query fro user with email and check if user is of type kilt
+        user = db.query(User).filter(User.email == email).first()
+        if not user:
+            return None
+        
+        if not user.is_from_kilt:
+            return None
+        
+        return user
+
+
 def create_access_token_copilot(
         *,
         data: dict,

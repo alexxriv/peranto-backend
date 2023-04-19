@@ -3,7 +3,7 @@ from typing import Any
 import logging 
 import asyncio
 import httpx
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Body, Depends, HTTPException, Request
 from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.orm.session import Session
 
@@ -13,7 +13,8 @@ from app import schemas
 from app.api import deps
 from app.core.auth import (
     authenticate,
-    create_access_token
+    create_access_token,
+    authenticate_kilt
 )
 from app.models.user import User
 from app.clients.kilt import KiltClient
@@ -46,31 +47,45 @@ def login(
     logger.info(response)
     return response
 
+@router.post('/test')
+async def update_item(
+        payload: dict = Body(...)
+        ):
+    return payload
 
 @router.post("/kilt-login")
-async def login(
-    *,
+async def kilt_login(
     kilt_client: KiltClient = Depends(deps.get_kilt_client),
-    presentation: schemas.PresentationCreate,
+    presentation: dict = Body(...),
+    db: Session = Depends(deps.get_db),
 ) -> Any:
     """
     Get the JWT for a user with data from OAuth2 request form body
     """
     logger.debug(presentation)
-    return ""
-    logger.debug(json.loads(presentation))
-    return ""
     logger.info("User logging in")
     async with httpx.AsyncClient(timeout=90) as client:
         response = await client.post(
             kilt_client.base_url + "present",
-            json={"presentation": presentation},
+            json={"presentation": json.dumps(presentation)},
         )
         response.raise_for_status()
-        logger.info(response)
-    logger.debug(response.json())
+    valid = response.json()
+    logger.info(valid)
+    if not valid:
+        logger.info("Invalid presentation")
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    
+    logger.debug("Valid presentation: " + str(valid))
+    email = presentation["claim"]["contents"]["email"]
+
+    user = authenticate_kilt(email=email, db=db)
+
+    if not user:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+
     response = {
-        "access_token": create_access_token(sub=json.loads(presentation).claim.contents.email),
+        "access_token": create_access_token(sub=email),
         "token_type": "bearer",
     }
 
@@ -79,7 +94,7 @@ async def login(
 
 
 @router.post("/kilt-signup")
-async def login(
+async def kilt_signup(
     *,
     db: Session = Depends(deps.get_db),
     kilt_client: KiltClient = Depends(deps.get_kilt_client),
