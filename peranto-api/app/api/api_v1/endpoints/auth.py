@@ -120,7 +120,7 @@ async def kilt_signup(
         response.raise_for_status()
         logger.info(response)
     logger.debug(response.json())
-    crud.user.create(db, obj_in=user_in)
+    crud.user.create_with_kilt(db, obj_in=user_in)
     return response.json()
     
 
